@@ -6,17 +6,17 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.agent import ProblemDiagnosisAgent
+from src.agents.scanner import RealWorldScanner
 
-class TestProblemDiagnosisAgent(unittest.TestCase):
+class TestRealWorldScanner(unittest.TestCase):
 
     def setUp(self):
         # Setup environment variable for testing
         os.environ["GEMINI_API_KEY"] = "test_key"
 
-    @patch("src.agent.genai")
+    @patch("src.core.agent.genai")
     def test_initialization(self, mock_genai):
-        agent = ProblemDiagnosisAgent()
+        agent = RealWorldScanner()
 
         # Verify configure was called with the key
         mock_genai.configure.assert_called_with(api_key="test_key")
@@ -25,18 +25,16 @@ class TestProblemDiagnosisAgent(unittest.TestCase):
         mock_genai.GenerativeModel.assert_called()
 
         # Verify chat session started
-        # Depending on how the mock works, accessing agent.model might be accessing the return value of GenerativeModel()
-        # So we verify that start_chat was called on the mock object returned by GenerativeModel
         mock_genai.GenerativeModel.return_value.start_chat.assert_called_with(history=[])
 
-    @patch("src.agent.genai")
+    @patch("src.core.agent.genai")
     def test_initialization_with_explicit_key(self, mock_genai):
-        agent = ProblemDiagnosisAgent(api_key="explicit_key")
+        agent = RealWorldScanner(api_key="explicit_key")
         mock_genai.configure.assert_called_with(api_key="explicit_key")
 
-    @patch("src.agent.genai")
-    def test_diagnose(self, mock_genai):
-        agent = ProblemDiagnosisAgent()
+    @patch("src.core.agent.genai")
+    def test_execute(self, mock_genai):
+        agent = RealWorldScanner()
 
         # Mock the response
         mock_chat = agent.chat_session
@@ -44,22 +42,22 @@ class TestProblemDiagnosisAgent(unittest.TestCase):
         mock_response.text = "Diagnostic response"
         mock_chat.send_message.return_value = mock_response
 
-        response = agent.diagnose("My problem is X")
+        response = agent.execute("My problem is X")
 
         mock_chat.send_message.assert_called_with("My problem is X")
         self.assertEqual(response, "Diagnostic response")
 
-    @patch("src.agent.genai")
+    @patch("src.core.agent.genai")
     def test_error_handling(self, mock_genai):
-        agent = ProblemDiagnosisAgent()
+        agent = RealWorldScanner()
 
         # Mock an exception
         mock_chat = agent.chat_session
         mock_chat.send_message.side_effect = Exception("API Error")
 
-        response = agent.diagnose("My problem is X")
+        response = agent.execute("My problem is X")
 
-        self.assertIn("Error communicating with the diagnosis agent", response)
+        self.assertIn("Error executing Real-World Problem & Opportunity Scanner", response)
         self.assertIn("API Error", response)
 
     def tearDown(self):

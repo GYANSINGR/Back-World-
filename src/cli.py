@@ -1,41 +1,40 @@
 import sys
 import os
 
-# Add the project root to sys.path to allow imports from src if run directly
+# Add the project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.agent import ProblemDiagnosisAgent
+from src.core.engine import SemaseEngine
 
 def main():
-    print("Initializing Problem Diagnosis Agent...")
+    print("Initializing SE-MASE (Self-Evolving Multi-Agent Skill Engine)...")
     try:
-        agent = ProblemDiagnosisAgent()
+        engine = SemaseEngine()
     except ValueError as e:
         print(f"Error: {e}")
         return
 
-    print("\n--- Problem Diagnosis Agent ---")
-    print("I am here to identify your real underlying problem.")
+    print("\n--- SE-MASE ACTIVE ---")
     print("Type 'exit' or 'quit' to stop.")
     print("-------------------------------\n")
 
-    print("Agent: Please describe what is on your mind.")
+    print("Orchestrator: Ready. Awaiting System Input.")
 
     while True:
         try:
-            user_input = input("\nYou: ").strip()
+            user_input = input("\nUser (Architect): ").strip()
         except EOFError:
             break
 
         if user_input.lower() in ["exit", "quit"]:
-            print("Exiting diagnosis session.")
+            print("Shutting down SE-MASE.")
             break
 
         if not user_input:
             continue
 
-        response = agent.diagnose(user_input)
-        print(f"\nAgent: {response}")
+        response = engine.process_input(user_input)
+        print(f"\n{response}")
 
 if __name__ == "__main__":
     main()
